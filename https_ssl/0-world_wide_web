@@ -19,7 +19,7 @@ if [ -z "$domain" ]; then
 fi
 
 if [ -z "$subdomain" ]; then
-  for sub in www lb-01 web-01 web-02; do
+  for sub in www 98.93.160.232 35.175.152.228 44.202.81.191; do
     get_info "$sub"
   done
 else
