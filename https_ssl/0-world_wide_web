@@ -4,12 +4,20 @@
 domain=$1
 subdomain=$2
 
-get_info() {
+get_record_info() {
   local sub=$1
-  local output
-  output=$(dig +short A ${sub}.${domain})
-  if [ -n "$output" ]; then
-    echo "The subdomain ${sub} is a A record and points to ${output}"
+  local query="${sub}.${domain}"
+  local answer
+
+  # shellcheck disable=SC2086
+  answer=$(dig +noall +answer ${query})
+
+  if [ -n "$answer" ]; then
+    local parsed
+    parsed=$(awk 'NR==1 {print $4 " " $5}' <<< "$answer")
+    local record_type destination
+    read -r record_type destination <<< "$parsed"
+    echo "The subdomain ${sub} is a ${record_type} record and points to ${destination}"
   fi
 }
 
@@ -20,8 +28,8 @@ fi
 
 if [ -z "$subdomain" ]; then
   for sub in www lb-01 web-01 web-02; do
-    get_info "$sub"
+    get_record_info "$sub"
   done
 else
-  get_info "$subdomain"
+  get_record_info "$subdomain"
 fi
