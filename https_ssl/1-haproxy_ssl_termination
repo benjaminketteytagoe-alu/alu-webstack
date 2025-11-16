@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Installs and configures HAProxy with SSL termination
+
+apt-get update -y
+apt-get install -y haproxy openssl
+
+# Create SSL certificate directory
+mkdir -p /etc/haproxy/certs
+
+# Generate a self-signed certificate (valid 1 year)
+openssl req -new -x509 -days 365 -nodes \
+  -subj "/CN=www.helenbot.tech" \
+  -out /etc/haproxy/certs/www.helenbot.tech.crt \
+  -keyout /etc/haproxy/certs/www.helenbot.tech.key
+
+# Combine cert and key in a single PEM file
+cat /etc/haproxy/certs/www.helenbot.tech.crt /etc/haproxy/certs/www.helenbot.tech.key \
+  > /etc/haproxy/certs/www.helenbot.tech.pem
+
+# Backup default config
+cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
+
+# Write new HAProxy config
+cat > /etc/haproxy/haproxy.cfg <<'EOF'
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    user haproxy
+    group haproxy
+    daemon
+    ssl-default-bind-options no-sslv3
+    ssl-default-bind-ciphers ECDHE-RSA-AES128-GCM-SHA256:AES128+EECDH:AES128+EDH
+
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    timeout connect 5000
+    timeout client  50000
+    timeout server  50000
+
+frontend https-in
+    bind *:443 ssl crt /etc/haproxy/certs/www.helenbot.tech.pem
+    default_backend web-backend
+
+frontend http-in
+    bind *:80
+    redirect scheme https code 301 if !{ ssl_fc }
+
+backend web-backend
+    balance roundrobin
+    server web-01 54.172.16.102:80 check
+    server web-02 18.233.224.205:80 check
+EOF
+
+# Restart HAProxy using 'service' command
+service haproxy restart
+service haproxy status
