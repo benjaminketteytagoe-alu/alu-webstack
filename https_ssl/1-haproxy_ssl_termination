@@ -9,13 +9,13 @@ mkdir -p /etc/haproxy/certs
 
 # Generate a self-signed certificate (valid 1 year)
 openssl req -new -x509 -days 365 -nodes \
-  -subj "/CN=www.helenbot.tech" \
+  -subj "/CN=www.benjamin.tech" \
   -out /etc/haproxy/certs/www.benjamin.tech.crt \
   -keyout /etc/haproxy/certs/www.benjamin.tech.key
 
 # Combine cert and key in a single PEM file
-cat /etc/haproxy/certs/www.helenbot.tech.crt /etc/haproxy/certs/www.helenbot.tech.key \
-  > /etc/haproxy/certs/www.helenbot.tech.pem
+cat /etc/haproxy/certs/www.benjamin.tech.crt /etc/haproxy/certs/www.benjamin.tech.key \
+  > /etc/haproxy/certs/www.benjamin.tech.pem
 
 # Backup default config
 cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
@@ -42,7 +42,7 @@ defaults
     timeout server  50000
 
 frontend https-in
-    bind *:443 ssl crt /etc/haproxy/certs/www.helenbot.tech.pem
+    bind *:443 ssl crt /etc/haproxy/certs/www.benjamin.tech.pem
     default_backend web-backend
 
 frontend http-in
