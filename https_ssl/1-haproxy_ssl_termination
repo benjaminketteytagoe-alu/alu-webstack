@@ -10,8 +10,8 @@ mkdir -p /etc/haproxy/certs
 # Generate a self-signed certificate (valid 1 year)
 openssl req -new -x509 -days 365 -nodes \
   -subj "/CN=www.helenbot.tech" \
-  -out /etc/haproxy/certs/www.helenbot.tech.crt \
-  -keyout /etc/haproxy/certs/www.helenbot.tech.key
+  -out /etc/haproxy/certs/www.benjamin.tech.crt \
+  -keyout /etc/haproxy/certs/www.benjamin.tech.key
 
 # Combine cert and key in a single PEM file
 cat /etc/haproxy/certs/www.helenbot.tech.crt /etc/haproxy/certs/www.helenbot.tech.key \
@@ -51,8 +51,8 @@ frontend http-in
 
 backend web-backend
     balance roundrobin
-    server web-01 54.172.16.102:80 check
-    server web-02 18.233.224.205:80 check
+    server web-01 35.175.152.228 check
+    server web-02 44.202.81.191 check
 EOF
 
 # Restart HAProxy using 'service' command
